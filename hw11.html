@@ -10,10 +10,7 @@
 
     <script>
        
-		var camera, scene, renderer, stats, object, angle = 0.0, k = 5, time = 0.0, clock;
-        var radius = 250, time = 0;
-        var omega = Math.PI * 2 / 30;
-        window.addEventListener('resize',onWindowResize,false);
+
         function unitize(object,targetSize) {
             var box3 = new THREE.Box3();
             box3.setFromObject(object);
