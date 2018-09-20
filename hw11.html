@@ -10,7 +10,10 @@
 
     <script>
        
-
+		var camera, scene, renderer, stats, object, angle = 0.0, k = 5, time = 0.0, clock;
+        var radius = 250, time = 0;
+        var omega = Math.PI * 2 / 30;
+        window.addEventListener('resize',onWindowResize,false);
         function unitize(object,targetSize) {
             var box3 = new THREE.Box3();
             box3.setFromObject(object);
@@ -68,9 +71,11 @@
 		scene = new THREE.Scene();
 		var grid = new THREE.GridHelper(200, 30, 0xffffff, 0xffffff);
 		scene.add(grid);
-		//grid.rotation.x = Math.PI / 2;
+		grid.rotation.x = Math.PI / 2;
 		var axes = new THREE.AxisHelper(5);
 		scene.add(axes);
+			
+			
 		
 			renderer = new THREE.WebGLRenderer();
 		document.body.appendChild(renderer.domElement);
@@ -91,6 +96,7 @@
 
 		readModel('taxi');
 		object = scene.getObjectByName('OBJ');
+		
 			
 		}
 
@@ -103,13 +109,14 @@
 		if (k % 2 == 0) n = k / 2; //偶數片葉子
 		else n = k; //奇數片葉子
 		var x = 80 * Math.cos(n * w * t) * Math.sin(w * t);
-		var z = 80 * Math.cos(n * w * t) * Math.cos(w * t);
+		var y = 80 * Math.cos(n * w * t) * Math.cos(w * t);
 		var dx = (-n) * w * Math.sin(w * t) * Math.sin(n * w * t) - w * Math.cos(w * t) * Math.cos(n * w * t);
-		var dz = (-n) * w * Math.cos(w * t) * Math.sin(n * w * t) + w * Math.sin(w * t) * Math.cos(n * w * t);
-
-		object.position.set(x, 8, z);
-		object.rotation.y = Math.atan2(dz, dx);
-		//object.rotation.y= Math.atan2(dz, dx)+15;
+		var dy = (-n) * w * Math.cos(w * t) * Math.sin(n * w * t) + w * Math.sin(w * t) * Math.cos(n * w * t);
+		
+		object.position.set(x, y, 8);
+			object.rotation.x= Math.PI / 2;
+		object.rotation.y = Math.atan2(dy, dx);
+		
 		}
 		
 		
