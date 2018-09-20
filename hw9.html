@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+	<head>
+	
+	</head>
+	
+	<body>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+
+		<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
+
+		<script>
+			var camera, scene, renderer, stats, loader;
+
+
+init();
+animate();
+
+function creatmodel() {
+
+  let loader = new THREE.TextureLoader();
+  loader.crossOrigin = '';
+  texture = loader.load('https://i.imgur.com/DrvlmNW.jpg');
+  alpha = loader.load('https://i.imgur.com/pYpcBHY.png');
+  texture2 = loader.load("https://i.imgur.com/DrvlmNW.jpg");
+  texture2.repeat.set(1, 1/3);
+
+  let matArray = [];
+  matArray.push(new THREE.MeshPhongMaterial({
+    map: texture2 //1
+  }));
+  matArray.push(new THREE.MeshPhongMaterial({
+    map: texture2 //6
+  }));
+  matArray.push(new THREE.MeshPhongMaterial({
+    map: texture,
+    alphaMap: alpha,
+    transparent: true  //2
+  }));
+  matArray.push(new THREE.MeshPhongMaterial({
+    map: texture //5
+  }));
+  matArray.push(new THREE.MeshPhongMaterial({
+    map: texture2  //3
+  }));
+  matArray.push(new THREE.MeshPhongMaterial({
+    map: texture2  //4
+  }));
+
+  var box = new THREE.BoxGeometry(60, 20, 60);
+  var material = new THREE.MultiMaterial(matArray);
+  var model1 = new THREE.Mesh(box, material);
+
+  return model1;
+
+}
+
+function createhole() {
+  loader = new THREE.TextureLoader();
+  loader.crossOrigin = '';
+  let texture = loader.load("https://i.imgur.com/DrvlmNW.jpg");
+
+  var matArray = new THREE.MeshPhongMaterial({
+    map: texture,
+    side: THREE.BackSide
+  });
+
+  var hole = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 10, 40, 2, false), matArray)
+
+  return hole;
+}
+
+function init() {
+
+  raycaster = new THREE.Raycaster();
+  clock = new THREE.Clock();
+  stats = new Stats();
+  stats.domElement.style.position = 'absolute';
+  stats.domElement.style.top = '0px';
+  stats.domElement.style.zIndex = 100;
+  document.body.appendChild(stats.domElement);
+
+  scene = new THREE.Scene();
+  var axes = new THREE.AxisHelper(5);
+  scene.add(axes);
+
+  //建立平面的背景（灰色地方）
+  var plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0.0,
+    visible: true
+  }));
+
+
+  renderer = new THREE.WebGLRenderer();
+  document.body.appendChild(renderer.domElement);
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  renderer.setSize(width, height);
+  renderer.setClearColor(0x888888);
+
+  camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.z = 300;
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  window.addEventListener('resize', onWindowResize, false);
+  controls.enableKeys = false;
+  document.body.appendChild(renderer.domElement);
+
+  var light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(150, 150, 150);
+  scene.add(light);
+
+  loader = new THREE.TextureLoader();
+  loader.crossOrigin = '';
+
+  box = creatmodel();
+  cylinder = createhole();
+  cylinder.position.y = 5;
+
+  woodPlank = new THREE.Object3D();
+  woodPlank.add(box, cylinder);
+  scene.add(woodPlank);
+}
+
+var angle = 0;
+
+function animate() {
+  controls.update();
+  angle += 0.01;
+  woodPlank.rotation.y = angle;
+
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
+
+function onWindowResize() {
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+
+		</script>
+	</body>
+</html>
