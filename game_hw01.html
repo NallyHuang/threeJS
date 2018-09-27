@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
 	<script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/MTLLoader.js"></script>
     <script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/OBJLoader.js"></script>
-
+	
 
 
 
@@ -77,8 +77,8 @@
 	  renderer.setSize(window.innerWidth, window.innerHeight);
 	  renderer.setClearColor(0x888888);
 	  document.body.appendChild(renderer.domElement);
-	  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-	  camera.position.z = 50; // important
+	  camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 1000);
+	  camera.position.z = 200; // important
 
 	  controls = new THREE.OrbitControls(camera, renderer.domElement);
 	  scene = new THREE.Scene();
@@ -143,11 +143,11 @@
 	  var path = new THREE.Shape();
 	  path.moveTo(0, 12);
 	  path.absarc(0, 0, 14, Math.PI, Math.PI * 2);
-	  path.lineTo(12, 12);
-	  path.lineTo(8, 12);
+	  path.lineTo(16, 12);
+	  path.lineTo(10, 12);
 	  path.absarc(0, 0, 6, Math.PI * 2, Math.PI, true);
-	  path.lineTo(-8, 12);
-	  path.lineTo(-12, 12);
+	  path.lineTo(-10, 12);
+	  path.lineTo(-16, 12);
 
 	  var extOpt = {
 		curveSegments: 15,
@@ -166,7 +166,7 @@
 
 	  let loader = new THREE.TextureLoader();
 	  loader.crossOrigin = ''
-	  grass = loader.load('http://pic.qiantucdn.com/58pic/12/06/22/21B58PICvg8.jpg!qt324');
+	  grass = loader.load('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDcoZz-88hslyY0VFUiEVNGk4Bs6iz7VVBvHw5X5XUFjRUs5O9');
 
 		var uMat = new THREE.MeshBasicMaterial({
 		map: grass,
@@ -197,6 +197,9 @@
 
 
 	}
+
+
+
 
 
 
