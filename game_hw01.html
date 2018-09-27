@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+    
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js">
+</script>
+
+	<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
+	<script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/MTLLoader.js"></script>
+    <script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/OBJLoader.js"></script>
+
+
+
+
+<script>
+       
+	var renderer, camera, controls, scene;
+	var angle, object;
+
+
+	function unitize(object, targetSize) {
+	  var box3 = new THREE.Box3();
+	  box3.setFromObject(object);
+	  var size = new THREE.Vector3();
+	  size.subVectors(box3.max, box3.min);
+	  var center = new THREE.Vector3();
+	  center.addVectors(box3.max, box3.min).multiplyScalar(0.5);
+	  console.log('center: ' + center.x + ', ' + center.y + ', ' + center.z);
+	  console.log('size: ' + size.x + ', ' + size.y + ', ' + size.z);
+	  var objSize = Math.max(size.x, size.y, size.z);
+	  var scaleSet = targetSize / objSize;
+	  var theObject = new THREE.Object3D();
+	  theObject.add(object);
+	  object.scale.set(scaleSet, scaleSet, scaleSet);
+	  object.position.set(-center.x * scaleSet, -center.y * scaleSet, -center.z * scaleSet);
+	  return theObject;
+	}
+
+
+	function readModel(modelName, targetSize = 40) {
+	  var onProgress = function(xhr) {
+		if (xhr.lengthComputable) {
+		  var percentComplete = xhr.loaded / xhr.total * 100;
+		  console.log(Math.round(percentComplete, 2) + '% downloaded');
+		}
+	  }
+
+	  var onError = function(xhr) {}
+
+	  var mtlLoader = new THREE.MTLLoader();
+	  mtlLoader.setPath('model/');
+	  mtlLoader.load(modelName + '.mtl', function(materials) {
+		materials.preload();
+		var objLoader = new THREE.OBJLoader();
+		objLoader.setMaterials(materials);
+		objLoader.setPath('model/');
+		objLoader.load(modelName + '.obj', function(object) {
+		  let theObject = unitize(object, targetSize);
+		  theObject.name = 'OBJ';
+		  scene.add(theObject);
+		}, onProgress, onError);
+	  })
+	}
+
+
+
+	init();
+	animate();
+
+	function init() {
+	  renderer = new THREE.WebGLRenderer({
+		antialias: true
+	  });
+	  renderer.setSize(window.innerWidth, window.innerHeight);
+	  renderer.setClearColor(0x888888);
+	  document.body.appendChild(renderer.domElement);
+	  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+	  camera.position.z = 50; // important
+
+	  controls = new THREE.OrbitControls(camera, renderer.domElement);
+	  scene = new THREE.Scene();
+
+	  //let gridXZ = new THREE.GridHelper(100, 10, 'red', 'white');
+	  //scene.add(gridXZ);
+
+	  //let axes = new THREE.AxisHelper(10);
+	  //scene.add(axes);
+
+	  var light = new THREE.AmbientLight(0xffffff);
+	  scene.add(light);
+
+
+	  readModel('train');
+	  object = scene.getObjectByName('OBJ');
+
+	  angle = 0;
+		//////////
+		
+	  createrailway();
+	  cave();
+
+	}
+
+
+	function update() {
+	  angle = angle + 0.01; // radian
+	  object.rotation.y = angle + Math.PI / 2;
+	  //console.log (angle)
+
+	  object.position.set(60 * Math.cos(angle), 4, -60 * Math.sin(angle));
+	  createrailway();
+
+	}
+
+	function createrailway() {
+
+	  frame = new THREE.Object3D();
+	  scene.add(frame);
+		
+		let loader = new THREE.TextureLoader();
+	  loader.crossOrigin = ''
+	  texture = loader.load('http://ku.90sjimg.com/element_pic/17/11/26/99a7be3b92f52877a106e16c4f0d9cd6.jpg');
+    
+    //texture.offset.set=(0.3,03);
+	  
+	  var geometry = new THREE.RingGeometry(50, 70, 32);
+	  var material = new THREE.MeshBasicMaterial({
+		//color: 0xa5792c,
+		map: texture,
+		side: THREE.DoubleSide
+	  });
+	  var mesh = new THREE.Mesh(geometry, material);
+	  mesh.rotation.x = Math.PI / 2;
+	  scene.add(mesh);
+
+	}
+
+
+	function cave() {
+	  var path = new THREE.Shape();
+	  path.moveTo(0, 12);
+	  path.absarc(0, 0, 14, Math.PI, Math.PI * 2);
+	  path.lineTo(12, 12);
+	  path.lineTo(8, 12);
+	  path.absarc(0, 0, 6, Math.PI * 2, Math.PI, true);
+	  path.lineTo(-8, 12);
+	  path.lineTo(-12, 12);
+
+	  var extOpt = {
+		curveSegments: 15,
+		depth: 1,
+		steps: 2,
+		amount: 10,
+		bevelEnabled: false,
+		bevelThickness: 1,
+		bevelSize: 1,
+		bevelSegments: 1
+	  }
+
+
+
+	  var uGeom = new THREE.ExtrudeGeometry(path, extOpt);
+
+	  let loader = new THREE.TextureLoader();
+	  loader.crossOrigin = ''
+	  grass = loader.load('http://pic.qiantucdn.com/58pic/12/06/22/21B58PICvg8.jpg!qt324');
+
+		var uMat = new THREE.MeshBasicMaterial({
+		map: grass,
+		side: THREE.DoubleSide
+		  
+	  });
+
+	  var u = new THREE.Mesh(uGeom, uMat);
+	  u.rotation.x = Math.PI;
+	  u.position.x = 60;
+	  u.position.y = 12;
+	  scene.add(u);
+	}
+
+
+
+
+
+	function animate() {
+	  controls.update();
+
+	  if (object != undefined)
+		update();
+
+	  else object = scene.getObjectByName('OBJ');
+	  requestAnimationFrame(animate);
+	  renderer.render(scene, camera);
+
+
+	}
+
+
+
+
+
+    </script>
+</body>
+</html>
