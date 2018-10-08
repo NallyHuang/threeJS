@@ -11,13 +11,17 @@
 	<script>
 
 	var camera, scene, renderer, stats, loader, light;
-
+var angle = 0.0,
+  
+window.addEventListener('resize', onWindowResize, false);
 init();
 animate();
 
 function buildBox2() {
   var texture = loader.load('https://i.imgur.com/p8CRm9W.jpg');
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  
+ 
   
   
   //前梯形
