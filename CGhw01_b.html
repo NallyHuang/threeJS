@@ -17,7 +17,7 @@ window.addEventListener('resize', onWindowResize, false);
 init();
 animate();
 
-function buildBox2() {
+function buildBox() {
   var texture = loader.load('https://i.imgur.com/p8CRm9W.jpg');
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   
@@ -187,7 +187,7 @@ function init() {
   loader.crossOrigin = '';
   
   
-     buildBox2();
+     buildBox();
      buildCylinder();
 }
 
