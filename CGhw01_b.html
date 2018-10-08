@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ 
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
+
+	<script>
+
+	var camera, scene, renderer, stats, loader, light;
+var angle = 0.0,
+  woodPlank, woodPlank2;
+window.addEventListener('resize', onWindowResize, false);
+init();
+animate();
+
+function buildBox2() {
+  var texture = loader.load('https://i.imgur.com/p8CRm9W.jpg');
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  
+ 
+  
+  
+  //前梯形
+  var shape = new THREE.Shape();
+  shape.moveTo(0, 0);
+  shape.lineTo(4.7, 0);
+  shape.lineTo(4.7, 0.8);
+  shape.lineTo(1.65, 2.6);
+  shape.lineTo(0, 2.6);
+  shape.lineTo(0, 0);
+  
+  var hole = new THREE.Path();
+  hole.moveTo(2, 1);
+  
+  for (let i = 1; i < 100; i++)
+    hole.lineTo(0.5 * Math.cos(Math.PI * 2 / 100 * i) + 1.5, 0.5 * Math.sin(Math.PI * 2 / 100 * i) + 1); //畫出一百個點
+  
+  shape.holes.push(hole);//前
+  
+  //後梯形
+  let shape2 = new THREE.ShapeGeometry(shape);
+  shape = new THREE.Shape();
+  shape.moveTo(0, 0);
+  shape.lineTo(4.7, 0);
+  shape.lineTo(4.7, 2.6);
+  shape.lineTo(0, 2.6);
+  
+  shape.holes.push(hole);//後
+  
+  let shape3 = new THREE.ShapeGeometry(shape);
+  
+  var side = new THREE.Geometry();
+  side.vertices.push (
+    new THREE.Vector3(0, 2.6, 0), //0
+    new THREE.Vector3(1.9, 2.6, 0),
+    new THREE.Vector3(0, 2.6, -2),
+    new THREE.Vector3(1.9, 2.6, -2),
+    new THREE.Vector3(4.7, 2.6, -2),
+    new THREE.Vector3(4.7, 2.6, -1), //5
+    new THREE.Vector3(1.9, 2.6, -1),
+    new THREE.Vector3(4.7, 0.8, -1),
+    new THREE.Vector3(4.7, 0.8, 0),
+    new THREE.Vector3(4.7, 0, 0),
+    new THREE.Vector3(4.7, 0, -1), //10
+    new THREE.Vector3(4.7, 0, -2),
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, 0, -2)
+  );
+  
+  var face = new THREE.Face3(0, 1, 2);//上1
+  side.faces.push(face);
+  face = new THREE.Face3(2, 1, 3);//上2
+  side.faces.push(face);
+  face = new THREE.Face3(3, 6, 4);//上3
+  side.faces.push(face);
+  face = new THREE.Face3(4, 6, 5);//上4
+  side.faces.push(face);
+  face = new THREE.Face3(6, 1, 7);//斜面右上
+  side.faces.push(face);
+  face = new THREE.Face3(7, 1, 8);//斜面右下
+  side.faces.push(face);
+  face = new THREE.Face3(8, 9, 7); //右1
+  side.faces.push(face);
+  face = new THREE.Face3(7, 9, 10);//右2
+  side.faces.push(face);
+  face = new THREE.Face3(5, 10, 4);//右3
+  side.faces.push(face);
+  face = new THREE.Face3(4, 10, 11); //右4
+  side.faces.push(face);
+  face = new THREE.Face3(5, 6, 7);//三角
+  side.faces.push(face);  
+  face = new THREE.Face3(0, 2, 12);//左1
+  side.faces.push(face);
+  face = new THREE.Face3(12, 2, 13);//左2
+  side.faces.push(face);
+  face = new THREE.Face3(12, 13, 9);//左3
+  side.faces.push(face);
+  face = new THREE.Face3(9, 13, 11);//左4
+  side.faces.push(face);
+  
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0), new THREE.Vector2(0, 1), new THREE.Vector2(1, 0)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 1), new THREE.Vector2(1, 0), new THREE.Vector2(1, 1)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0), new THREE.Vector2(0, 1), new THREE.Vector2(1, 0)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 1), new THREE.Vector2(1, 0), new THREE.Vector2(1, 1)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0), new THREE.Vector2(0, 1), new THREE.Vector2(1, 0)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  side.faceVertexUvs[0].push([new THREE.Vector2(0, 0.25), new THREE.Vector2(0, 0.5), new THREE.Vector2(0.25, 0.25)]);
+  
+  var mesh = new THREE.Mesh(side, new THREE.MeshPhongMaterial({
+    map: texture
+  }));
+  shape2.mergeMesh(mesh);
+  
+  //洞的材質
+  var mesh2 = new THREE.Mesh(shape2, new THREE.MeshPhongMaterial({
+    map: texture
+  })); 
+  mesh2.position.z = 2;
+  
+  shape3.mergeMesh(mesh2);
+  var allMesh = new THREE.Mesh(shape3, new THREE.MeshPhongMaterial({
+    map: texture,
+    side: THREE.DoubleSide
+  })); 
+  
+  allMesh.scale.set(10, 10, 10);
+  scene.add(allMesh);
+
+
+  
+}
+
+
+
+function buildCylinder() {
+  var texture = loader.load('https://i.imgur.com/p8CRm9W.jpg');
+  var cylinder = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 20, 30, 1, true), new THREE.MeshPhongMaterial({
+    map: texture,
+    side: THREE.BackSide
+  }));
+  
+   cylinder.rotation.x = -Math.PI / 2;
+   cylinder.position.set(15,10,10);
+  
+  scene.add(cylinder);
+}
+
+
+function init() {
+  scene = new THREE.Scene();
+  stats = new Stats();
+  stats.domElement.style.position = 'absolute';
+  stats.domElement.style.top = '0px';
+  stats.domElement.style.zIndex = 100;
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+
+  var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+  scene.add(gridXZ);
+
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.set(0, 0, 200);
+  camera.lookAt(new THREE.Vector3());
+  scene.add(camera);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableKeys = false;
+  document.body.appendChild(renderer.domElement);
+  let light = new THREE.AmbientLight(0xffffff);
+  scene.add(light);
+
+  loader = new THREE.TextureLoader();
+  loader.crossOrigin = '';
+  
+  
+     buildBox2();
+     buildCylinder();
+}
+
+function animate() {
+  controls.update();
+  
+  requestAnimationFrame(animate);
+  render();
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
+
+function onWindowResize() {
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+
+</script>
+</body>
+
+</html>
