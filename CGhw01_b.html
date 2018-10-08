@@ -17,9 +17,7 @@ animate();
 
 function buildBox2() {
   var texture = loader.load('https://i.imgur.com/p8CRm9W.jpg');
-  
-  
- 
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   
   
   //前梯形
