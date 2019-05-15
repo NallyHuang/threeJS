@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <style>
+    
+  </style>
+  <script>
+
+    window.addEventListener('load',function(){
+
+    
+      var context = new (window.AudioContext || window.webkitAudioContext)()
+      var oscillator = context.createOscillator();
+      var sound, type = 'sine', frequency=440, volume=1.5, p=0; //440(La)
+
+      var start = document.getElementById('start')
+      var stop = document.getElementById('stop')
+      var  sine = document.getElementById('sine')
+      var  square = document.getElementById('square')
+      var  triangle = document.getElementById('triangle')
+      var  frequencyRange = document.getElementById('frequencyRange')
+      var  volumeRange = document.getElementById('volumeRange')
+	  
+      function Gain (t,f,g){
+        oscillator.type = t; //振盪器
+        oscillator.frequency.value = f;
+        gainNodes = context.createGain(); 
+        gainNodes.gain.value = g;  //設定音量
+        oscillator.connect(gainNodes);  // 將聲音連到gainNode 
+        return gainNodes;
+      }
+
+      function Sound(){
+        if(p == 1){
+          sound.disconnect(context.destination);
+          sound = Gain(type,frequency,volume);
+          sound.connect(context.destination);  //播放
+        }
+      }
+
+      oscillator.start();
+
+      start.addEventListener('click',function(){
+        p = 1;
+        start = true;
+        stop = false;
+        sound = Gain(type,frequency,volume);
+        sound.connect(context.destination);
+      });
+
+      stop.addEventListener('click',function(){
+        p = 0;
+        start = false;
+        stop = true;
+        sound.disconnect(context.destination);
+      });
+
+      sine.addEventListener('click',function(){
+        type = 'sine';
+        Sound();
+      });
+
+      square.addEventListener('click',function(){
+        type = 'square';
+        Sound();
+      });
+
+      triangle.addEventListener('click',function(){
+        type = 'triangle';
+        Sound();
+      });
+
+      frequencyRange.oninput = function(){
+        frequency = this.value;
+        Sound();
+      };
+
+
+      volumeRange.oninput = function(){
+        volume = this.value;
+        Sound();
+      };
+
+      
+
+    });
+  </script>
+</head>
+
+<body>  
+  <button id="start">Start</button>
+  <button id="stop" >Stop</button>
+  <br><br>
+  type: 
+    <button id="sine" >sine</button>
+    <button id="square">square</button>
+    <button id="triangle">triangle</button>
+  <br><br>
+  frequency: <input type="range" min="261.6" max="1000" step="1" value="440" id="frequencyRange" >
+  <br>
+   volume: <input type="range" min="0" max="3" step="0.1" value="1.5" id="volumeRange" >
+</body>
+
+</html>
