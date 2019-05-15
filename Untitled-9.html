@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,6 +6,19 @@
   <style>
     
   </style>
+  <body>  
+  <button id="start">Start</button>
+  <button id="stop" >Stop</button>
+  <br><br>
+  type: 
+    <button id="sine" >sine</button>
+    <button id="square">square</button>
+    <button id="triangle">triangle</button>
+  <br><br>
+  frequency: <input type="range" min="0" max="3000" step="1" value="440" id="frequencyRange" >
+  <br>
+   volume: <input type="range" min="0" max="3" step="0.2" value="1" id="volumeRange" >
+</body>
   <script>
 
     window.addEventListener('load',function(){
@@ -14,7 +26,7 @@
     
       var context = new (window.AudioContext || window.webkitAudioContext)()
       var oscillator = context.createOscillator();
-      var sound, type = 'sine', frequency=440, volume=1.5, p=0; //440(La)
+      var sound,type = 'sine', frequency = 440, volume = 1, p = 0; //440(La)
 
       var start = document.getElementById('start')
       var stop = document.getElementById('stop')
@@ -90,18 +102,6 @@
   </script>
 </head>
 
-<body>  
-  <button id="start">Start</button>
-  <button id="stop" >Stop</button>
-  <br><br>
-  type: 
-    <button id="sine" >sine</button>
-    <button id="square">square</button>
-    <button id="triangle">triangle</button>
-  <br><br>
-  frequency: <input type="range" min="261.6" max="1000" step="1" value="440" id="frequencyRange" >
-  <br>
-   volume: <input type="range" min="0" max="3" step="0.1" value="1.5" id="volumeRange" >
-</body>
+
 
 </html>
