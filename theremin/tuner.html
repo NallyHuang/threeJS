@@ -1,0 +1,277 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Loop - Leap</title>
+
+    <script src="../leap-0.6.4.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+	<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+	
+	 <style>
+      body {
+        line-height: 2em;
+        font-size: 2em;
+        font-family: Helvetica;
+      }
+      
+      #info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+
+ #out {
+  position: absolute;
+  top: 250px;
+  width: 80%;
+  padding: 10px;
+  text-align: center;
+  color: #000000;
+  font-size:20px;
+  font-weight:bold
+}
+ #out2 {
+  position: absolute;
+  top: 0px;
+  width: 20%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+
+
+#intro {
+  position: absolute;
+  top: 58%;
+  width: 98%;
+  padding: 10px;
+  text-align: center;
+  color: #000000;
+  font-size:30px;
+  font-weight:bold
+}
+
+
+    </style>
+    
+    
+
+  </head>
+
+  <body>
+
+ 
+    <div  id="info"> Tuner 
+    <br><button onclick='playpause()'>play/pause</button><br>
+    </div>
+	<div id ="intro" ></div>
+	<div id="out"></div>
+    <div id="out2"></div>
+
+
+    <script>
+////////////////////////////////////////////////////////////////////////
+      // to make working with angles easy
+      window.TO_RAD = Math.PI / 180;
+      window.TO_DEG = 1 / TO_RAD;
+      
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+ 
+  var context = new AudioContext();
+  var oscillator = context.createOscillator();
+  var gainNode = context.createGain() 
+  oscillator.connect(gainNode)
+  oscillator.start();
+  var connected = false;
+  
+  gainNode.gain.value = 3// 音量 
+  
+
+  
+  var playpause = function() {
+    if (!connected) {
+      gainNode.connect(context.destination);
+    }
+    else {
+      gainNode.disconnect();
+    }
+    connected = !connected;
+  };
+
+	var F, d, f=261.62, v;
+    var k= Math.pow(2, 1/12);
+	var controller = new Leap. Controller(); 
+	  controller.connect();
+
+
+        controller.on ('frame', function(frame){
+		out.innerHTML = '' ; 
+		
+		if (frame.hands.length === 0) {
+        gainNode.gain.value = 0;
+      } else {
+        gainNode.gain.value = 0.05;
+      }
+
+		frame.hands.forEach(function(hand, index) {
+			
+		if (hand.type === "right") {
+			d = Math.round(hand.roll() * TO_DEG);	
+			if(d>90)
+				d = -180-(180-d);
+			F = f*((210-d)/200);
+			pitch(F);
+          	
+          	out.innerHTML +=   F.toFixed(2) + ' Hz ';
+          	oscillator.frequency.value = F;
+          }
+        
+        //音量
+        if (hand.type === "left") {
+        	v = (hand.palmPosition[1].toFixed(2));
+			if (v < 60) v = 0;
+			out.innerHTML += '<br>' + "position[Y] : " + hand.palmPosition[1].toFixed(2) + '<br>'
+			gainNode.gain.value = Math.sqrt(v)/5;
+        }
+        
+		})
+		})
+///////////////////////////////////////////////////////////////////////////
+var camera, scene, renderer,plane6;
+init();
+animate();
+
+
+
+function init() {
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.OrthographicCamera(-50, 50, 50, -50, -10, 100);
+  camera.position.z = 10;
+  scene.add(camera);
+  window.addEventListener('resize', onWindowResize, false);
+
+  ////////////////////////////////////////////////////////////////////////////////////////////
+  
+ var geometry = new THREE.PlaneGeometry( 45, 45, 10 );
+var material = new THREE.MeshBasicMaterial( {color: 0xDCDCDC, side: THREE.DoubleSide} );
+var plane = new THREE.Mesh( geometry, material );
+scene.add( plane );
+
+var geometry2 = new THREE.PlaneGeometry( 35, 30, 10 );
+var material = new THREE.MeshBasicMaterial( {color: 0x708090, side: THREE.DoubleSide} );
+var plane2 = new THREE.Mesh( geometry2, material );
+scene.add( plane2 );
+plane2.position.set(0,3,0);
+
+var geometry3 = new THREE.CircleGeometry( 4, 32 );
+var material3 = new THREE.MeshBasicMaterial( { color: 0xB22222 } );
+var circle = new THREE.Mesh( geometry3, material3 );
+scene.add( circle );
+circle.position.set(0,-12,0);
+
+var geometry4 = new THREE.PlaneGeometry( 30, 0.4, 10 );
+var material4 = new THREE.MeshBasicMaterial( {color: 0x000000, side: THREE.DoubleSide} );
+var plane4 = new THREE.Mesh( geometry4, material4 );
+scene.add( plane4);
+plane4.position.set(0,2,0);
+
+var geometry5 = new THREE.PlaneGeometry( 0.36, 15, 10 );
+var plane5 = new THREE.Mesh( geometry5, material4 );
+scene.add( plane5);
+plane5.position.set(0,4,0);
+
+var geometry6 = new THREE.PlaneGeometry( 0.8, 6, 10 );
+plane6 = new THREE.Mesh( geometry6, material3 );
+scene.add( plane6);
+plane6.position.y = 2;
+
+
+
+}
+var p = 0,  min=1000,c;
+function pitch(F){
+	if(F>=254.27 && F<269.39){
+		document.getElementById("intro").innerHTML='C4';
+		c = 1200* Math.log2(F/261.62)
+	}
+	if(F>=269.39 && F<285.42){
+		document.getElementById("intro").innerHTML='C4♯';
+		c = 1200* Math.log2(F/277.18)
+	}
+	if(F>=285.42 && F<302.39){
+		document.getElementById("intro").innerHTML='D4';
+		c = 1200* Math.log2(F/293.66)
+	}
+	if(F>=302.39 && F<320.37){
+		document.getElementById("intro").innerHTML='♭E4';
+		c = 1200* Math.log2(F/311.12)
+	}
+	if(F>=320.37 && F<339.42){
+		document.getElementById("intro").innerHTML='E4';
+		c = 1200* Math.log2(F/329.62)
+	}
+	if(F>=339.42 && F<359.60){
+		document.getElementById("intro").innerHTML='F4';
+		c = 1200* Math.log2(F/349.22)
+	}
+	if(F>=359.60 && F<380.99){
+		document.getElementById("intro").innerHTML='F4♯';
+		c = 1200* Math.log2(F/369.99)
+	}
+	if(F>=380.99 && F<403.64){
+		document.getElementById("intro").innerHTML='G4';
+		c = 1200* Math.log2(F/391.66)
+	}
+	if(F>=403.64 && F<427.64){
+		document.getElementById("intro").innerHTML='G4♯';
+		c = 1200* Math.log2(F/415.30)
+	}
+	if(F>=427.64 && F<453.11){
+		document.getElementById("intro").innerHTML='A4';
+		c = 1200* Math.log2(F/440)
+	}
+	if(F>=453.11 && F<480.01){
+		document.getElementById("intro").innerHTML='♭B4';
+		c = 1200* Math.log2(F/466.16)
+	}
+	if(F>=480.01 && F<508.56){
+		document.getElementById("intro").innerHTML='B4';
+		c = 1200* Math.log2(F/439.88)
+	}
+	p = c/3; 
+
+}
+
+function onWindowResize() {
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+	plane6.position.x = p;
+	
+  requestAnimationFrame(animate);
+  render();
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
+
+
+    
+    </script>
+
+   
+
+  </body>
+
+</html>
