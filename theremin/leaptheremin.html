@@ -1,0 +1,83 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Loop - Leap</title>
+
+    <script src="../leap-0.6.4.js"></script>
+
+    <script>
+////////////////////////////////////////////////////////////////////////
+      // to make working with angles easy
+      window.TO_RAD = Math.PI / 180;
+      window.TO_DEG = 1 / TO_RAD;
+      
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+ 
+  var context = new AudioContext();
+  var oscillator = context.createOscillator();
+  var gainNode = context.createGain() 
+  oscillator.connect(gainNode)
+  oscillator.start();
+  var connected = false;
+  
+  gainNode.gain.value = 0 // 音量 
+  
+  
+  var playpause = function() {
+    if (!connected) {
+      gainNode.connect(context.destination);
+    }
+    else {
+      gainNode.disconnect();
+    }
+    connected = !connected;
+  };
+	var F, d, f=261.62, v;
+    var k= Math.pow(2, 1/12);
+	var controller = new Leap. Controller(); 
+	  controller.connect();
+        controller.on ('frame', function(frame){
+		out.innerHTML = '' ; 
+
+		frame.hands.forEach(function(hand, index) {
+			
+		if (hand.type === "right") {
+			d = Math.round(hand.roll() * TO_DEG);	
+
+          	out.innerHTML += "Hand: " + hand.id + ' &nbsp;roll: ' + Math.round(hand.roll() * TO_DEG) + '°<br/>' ;
+
+          }
+        
+        //音量
+        if (hand.type === "left") {
+        	v = (hand.palmPosition[1].toFixed(2));
+			if (v < 60) v = 0;
+			out.innerHTML += '<br>' + "position[Y] : " + hand.palmPosition[1].toFixed(2) + '<br>'
+			gainNode.gain.value = Math.sqrt(v)/5;
+        }
+        
+		})
+		})
+///////////////////////////////////////////////////////////////////////////
+    
+    </script>
+
+    <style>
+      body {
+        line-height: 2em;
+        font-size: 2em;
+        font-family: Helvetica;
+      }
+    </style>
+
+  </head>
+
+  <body>
+
+    <div id="out"></div>
+    <button onclick='playpause()'>play/pause</button><br>
+
+
+  </body>
+
+</html>
