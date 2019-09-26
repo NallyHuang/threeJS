@@ -1,0 +1,439 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Loop - Leap</title>
+
+    <script src="../leap-0.6.4.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/107/three.min.js"></script>
+	<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+	  	<script src="https://threejs.org/examples/js/controls/OrbitControls.js">
+	</script>
+	
+	 <style>
+      body {
+        line-height: 2em;
+        font-size: 2em;
+        font-family: Helvetica;
+      }
+    .r{
+      width:80px;
+      margin:10px;
+    }
+      
+      #info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+      
+
+
+#quantization{
+  position: absolute;
+  top: 30%;
+  width: 90%;
+  padding: 10px;
+  text-align: center;
+  color: #ffffff;
+  font-size:18px;
+  font-weight:bold
+}
+
+ #out {
+  position: absolute;
+  top: 50%;
+  width: 105%;
+  padding: 10px;
+  text-align: center;
+  color: #ffffff;
+  font-size:18px;
+  font-weight:bold
+}
+
+
+
+#intro {
+  position: absolute;
+  top: 54%;
+  width: 84%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00;
+  font-size:25px;
+  font-weight:bold
+}
+
+
+    </style>
+    
+    
+
+  </head>
+
+  <body>
+
+ 	
+    <div  id="info"> Theremin 
+   
+    <br><button onclick='playpause()'>play/pause</button>
+		
+    </div>
+    <div  id="quantization">
+  		Quantization: <input type="range" min="0" max="2" step="1" value="0" oninput="myFunction(this.value)"  class="r"   ><i id="demo"></i>
+  		<select name="select" id="select" >
+		<option value="0">Ｃ</option> 
+		<option value="1">Ｆ</option> 
+		<option value="2">Ｇ</option> 
+		</select>
+
+    </div>
+	<div id ="intro" ></div>
+	<div id="out"></div>
+    <div id="out2"></div>
+
+
+    <script>
+////////////////////////////////////////////////////////////////////////
+
+var quantization;
+function myFunction(val) {
+  document.getElementById("demo").innerHTML = val; 
+  quantization = val;
+}
+  
+      
+      window.TO_RAD = Math.PI / 180;
+      window.TO_DEG = 1 / TO_RAD;
+      
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+ 
+  var context = new AudioContext();
+  var oscillator = context.createOscillator();
+  oscillator.type = "sine";
+  var gainNode = context.createGain() 
+  oscillator.connect(gainNode)
+  oscillator.start();
+  var connected = false;
+  
+  gainNode.gain.value = 3// 音量 
+
+  
+  var playpause = function() {
+    if (!connected) {
+      gainNode.connect(context.destination);
+    }
+    else {
+      gainNode.disconnect();
+    }
+    connected = !connected;
+  };
+
+	var F, d, f=261.62, f2=349.22, v, f3=391.66, x, y, Fre;
+    var k= Math.pow(2, 1/12);
+	var controller = new Leap. Controller(); 
+	  controller.connect();
+
+
+        controller.on ('frame', function(frame){
+		out.innerHTML = '' ; 
+		
+		if (frame.hands.length === 0) {
+        gainNode.gain.value = 0;
+      } else {
+        gainNode.gain.value = 0.05;
+      }
+
+		frame.hands.forEach(function(hand, index) {
+		//音頻
+		if (hand.type === "right") {
+			d = Math.round(hand.roll() * TO_DEG);	
+			if(d>90)
+				d = -180-(180-d);
+			if(document.getElementById("select").value==0)
+			    F = f * ((210-d)/200);
+			else if(document.getElementById("select").value==1)
+				F = f2 * ((210-d)/200);
+			else if(document.getElementById("select").value==2)
+				F = f3 * ((210-d)/200);
+			
+          	
+          	if(quantization==1) {
+          		x = (Math.log(F/f))/(Math.log(k));
+				Fre = f*Math.pow(k,Math.round(x));
+				oscillator.frequency.value = Fre;	
+				out.innerHTML += Fre.toFixed(2) + ' Hz ';
+				pitch(Fre);
+				
+          	}
+          	else if(quantization==2){
+          		x = (Math.log(F/f))/(Math.log(k));
+				y =(closest (x, array));
+				Fre = f*Math.pow(k,y);
+				oscillator.frequency.value = Fre;	
+				out.innerHTML += Fre.toFixed(2) + ' Hz ';
+				pitch(Fre);
+          	}
+          	else {
+          		out.innerHTML +=   F.toFixed(2) + ' Hz ';
+          		oscillator.frequency.value = F;
+          		pitch(F);
+          	}
+          }
+       
+        //音量
+        if (hand.type === "left") {
+        	v = (hand.palmPosition[1].toFixed(2));
+			if (v < 100) v = 0;
+			//out.innerHTML += '<br>' + "position[Y] : " + hand.palmPosition[1].toFixed(2) + '<br>'
+			gainNode.gain.value = (Math.pow(v,2))/400;
+			circle12.material.emissive.setHex( 0xcc0000);
+        }
+		else {
+			circle12.material.emissive.setHex( 0x000000 );
+		}
+        
+		})
+		})
+/////////////////////////////////////////////////////
+function closest (num, arr) {
+                var curr = arr[0];
+                var diff = Math.abs (num - curr);
+                for (var val = 0; val < arr.length; val++) {
+                    var newdiff = Math.abs (num - arr[val]);
+                    if (newdiff < diff) {
+                        diff = newdiff;
+                        curr = arr[val];
+                    }
+                }
+                return curr;
+  }
+ 
+array = [0,2,4,5,7,9,11,12,14,16,17,19];
+			
+///////////////////////////////////////////////////////////////////////////
+var camera, scene, renderer,controls,plane7,circle12 ;
+init();
+animate();
+
+
+
+function init() {
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x272727);
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.OrthographicCamera(-50, 50, 50, -50, -10, 100);
+  camera.position.z = 10;
+  scene.add(camera);
+  window.addEventListener('resize', onWindowResize, false);
+	 var directionalLight = new THREE.DirectionalLight( 0xFFFFFF, 1 );
+directionalLight.position.set( 0, 80, 500 );
+directionalLight.castShadow = true;
+scene.add( directionalLight );
+//controls=new THREE.OrbitControls(camera,renderer.domElement);
+  
+
+	
+	
+  ////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  var geometry = new THREE.BoxGeometry( 20, 10, 30 );
+var material = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+var box = new THREE.Mesh( geometry, material);
+scene.add( box );
+box.rotation.x = Math.PI/4;
+box.position.set(0,-10,0);
+
+ var geometry3 = new THREE.CylinderGeometry(15, 15 ,10 ,40 ,40);
+var circle = new THREE.Mesh( geometry3, material);
+scene.add( circle );
+circle.rotation.x = Math.PI/4;
+circle.position.set(-10,-10,0);
+
+var circle2 = new THREE.Mesh( geometry3, material);
+scene.add( circle2 );
+circle2.rotation.x = Math.PI/4;
+circle2.position.set(10,-10,0);
+
+var geometry4 = new THREE.PlaneGeometry( 20, 20, 0 );
+var material4 = new THREE.MeshBasicMaterial( {color: 0x000000, side: THREE.DoubleSide} );
+var plane = new THREE.Mesh( geometry4, material4 );
+scene.add( plane );
+plane.rotation.x = Math.PI/4;
+plane.position.set(0,-7,15);
+
+
+var geometry5 = new THREE.TorusGeometry( 10, 1, 16, 100 );
+var material5 = new THREE.MeshPhongMaterial( { color: 0xFFFFFF } );
+var torus = new THREE.Mesh( geometry5, material );
+scene.add( torus );
+torus.position.set(-28,-10,0)
+torus.rotation.x = -Math.PI/3;
+
+var geometry6 = new THREE.CylinderGeometry( 0.5, 0.5, 50, 32 );
+var cylinder6 = new THREE.Mesh( geometry6, material);
+scene.add( cylinder6 );
+ cylinder6.position.set(15,12,0);
+ cylinder6.rotation.x = Math.PI/6;
+ 
+ //音準線
+var geometry7 = new THREE.PlaneGeometry( 0.5, 4, 10 );
+var material7 = new THREE.MeshBasicMaterial( { color: 0xB22222 } );
+plane7 = new THREE.Mesh( geometry7, material7 );
+scene.add( plane7);
+plane7.position.set( 0,-8.5,17);
+
+
+var geometry8 = new THREE.PlaneGeometry( 0.4, 6.5, 10 );
+var plane8 = new THREE.Mesh( geometry8, material );
+scene.add( plane8);
+plane8.position.set(-4,-8,16);
+
+var plane9 = new THREE.Mesh( geometry8, material );
+scene.add( plane9);
+plane9.position.set(8,-8,16);
+	
+
+
+var geometry10 = new THREE.PlaneGeometry( 12, 0.3, 10 );
+var plane10 = new THREE.Mesh( geometry10, material );
+scene.add( plane10);
+plane10.position.set(2,-8.5,16);
+////
+var geometry11 = new THREE.CircleGeometry( 1, 32 );
+var material11 = new THREE.MeshPhongMaterial( { color: 0x696969 } );
+var material12 = new THREE.MeshLambertMaterial({
+                color: 0x696969,
+                emissive: 0x000000
+            });
+var circle11 = new THREE.Mesh( geometry11, material11 );
+circle11.position.set(13,-10,20);
+scene.add( circle11 );
+ circle12 = new THREE.Mesh( geometry11, material12 );
+circle12.position.set(17,-10,20);
+scene.add( circle12 );
+
+	
+var geometry13 = new THREE.PlaneGeometry( 0.1, 6.5, 10 );
+var plane13 = new THREE.Mesh( geometry13, material );
+scene.add( plane13);
+plane13.position.set(2,-8,16);
+
+
+
+}
+var p = 0,  min=1000,c;
+function pitch(F){
+	if(F>=254.27 && F<269.39){
+		document.getElementById("intro").innerHTML='C4';
+		c = 1200* Math.log2(F/261.62)
+		
+	}
+	if(F>=269.39 && F<285.42){
+		document.getElementById("intro").innerHTML='C4♯';
+		c = 1200* Math.log2(F/277.18)
+	}
+	if(F>=285.42 && F<302.39){
+		document.getElementById("intro").innerHTML='D4';
+		c = 1200* Math.log2(F/293.66)
+	}
+	if(F>=302.39 && F<320.37){
+		document.getElementById("intro").innerHTML='♭E4';
+		c = 1200* Math.log2(F/311.12)
+	}
+	if(F>=320.37 && F<339.42){
+		document.getElementById("intro").innerHTML='E4';
+		c = 1200* Math.log2(F/329.62)
+	}
+	if(F>=339.42 && F<359.60){
+		document.getElementById("intro").innerHTML='F4';
+		c = 1200* Math.log2(F/349.22)
+	}
+	if(F>=359.60 && F<380.99){
+		document.getElementById("intro").innerHTML='F4♯';
+		c = 1200* Math.log2(F/369.99)
+	}
+	if(F>=380.99 && F<403.64){
+		document.getElementById("intro").innerHTML='G4';
+		c = 1200* Math.log2(F/391.66)
+	}
+	if(F>=403.64 && F<427.64){
+		document.getElementById("intro").innerHTML='G4♯';
+		c = 1200* Math.log2(F/415.30)
+	}
+	if(F>=427.64 && F<453.11){
+		document.getElementById("intro").innerHTML='A4';
+		c = 1200* Math.log2(F/440)
+	}
+	if(F>=453.11 && F<480.01){
+		document.getElementById("intro").innerHTML='♭B4';
+		c = 1200* Math.log2(F/466.16)
+	}
+	if(F>=480.01 && F<508.56){
+		document.getElementById("intro").innerHTML='B4';
+		c = 1200* Math.log2(F/439.88)
+	}
+	if(F>=508.56 && F<538.67){
+		document.getElementById("intro").innerHTML='C5';
+		c = 1200* Math.log2(F/523.25)
+	}
+	if(F>=538.67 && F<570.84){
+		document.getElementById("intro").innerHTML='C5♯';
+		c = 1200* Math.log2(F/554.36)
+	}
+	if(F>=570.84 && F<604.78){
+		document.getElementById("intro").innerHTML='D5';
+		c = 1200* Math.log2(F/587.32)
+	}
+	if(F>=604.78 && F<640.80){
+		document.getElementById("intro").innerHTML='♭E4';
+		c = 1200* Math.log2(F/622.25)
+	}
+	if(F>=622.25 && F<678.85){
+		document.getElementById("intro").innerHTML='E5';
+		c = 1200* Math.log2(F/659.25)
+	}
+	if(F>=678.85 && F<719.21){
+		document.getElementById("intro").innerHTML='F5';
+		c = 1200* Math.log2(F/523.25)
+	}
+	if(F>=719.21 && F<761.98){
+		document.getElementById("intro").innerHTML='F5♯';
+		c = 1200* Math.log2(F/739.98)
+	}
+	p = c/8.3; 
+	if(p > 6) p=6;
+}
+
+function onWindowResize() {
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+plane7.position.x = p+2;
+
+
+  requestAnimationFrame(animate);
+  render();
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
+
+
+    
+    </script>
+
+   
+
+  </body>
+
+</html>
