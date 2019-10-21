@@ -67,8 +67,7 @@
         function init() {
 		clock = new THREE.Clock();
 	
-		document.body.appendChild(stats.domElement);
-		scene = new THREE.Scene();
+		
 		var grid = new THREE.GridHelper(200, 30, 0xffffff, 0xffffff);
 		scene.add(grid);
 		grid.rotation.x = Math.PI / 2;
