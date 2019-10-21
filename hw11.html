@@ -92,8 +92,9 @@
 		controls = new THREE.OrbitControls(camera, renderer.domElement);
 		
 
-		readModel('taxi');
+		readModel('tank1');
 		object = scene.getObjectByName('OBJ');
+		object.rotation.z = Math.PI/2;
 			
 		}
 
